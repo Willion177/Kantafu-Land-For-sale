@@ -85,7 +85,7 @@
 
             <!-- Info Panel -->
             <div class="info-panel" id="infoPanel">
-                <div id="regionalInfo" class="info-content">
+                <div id="regionalInfo" class="info-content collapsed">
                     <button class="mobile-toggle" id="regionalToggle">ℹ️ View Info</button>
                     <div class="panel-content">
                         <h3>Regional Overview</h3>
@@ -106,7 +106,7 @@
                         </div>
                     </div>
                 </div>
-                <div id="localInfo" class="info-content" style="display: none;">
+                <div id="localInfo" class="info-content collapsed" style="display: none;">
                     <button class="mobile-toggle" id="localToggle">ℹ️ View Info</button>
                     <div class="panel-content">
                         <h3>Local Detail View</h3>
@@ -130,15 +130,17 @@
             </div>
 
             <!-- Controls Info -->
-            <div class="controls-info">
-                <h3>Map Controls</h3>
-                <ul>
-                    <li>🖱️ <strong>Click + Drag:</strong> Pan map</li>
-                    <li>🔍 <strong>Scroll:</strong> Zoom in/out</li>
-                    <li>⌨️ <strong>Right Click + Drag:</strong> Rotate/tilt</li>
-                    <li>🎬 <strong>Start Tour:</strong> Animated flythrough</li>
-                    <li>📍 <strong>Click Markers:</strong> View info</li>
-                </ul>
+            <div class="controls-info collapsed" id="controlsInfo">
+                <button class="controls-toggle" id="controlsToggle">🎮 Map Controls</button>
+                <div class="controls-panel-content">
+                    <h3>Map Controls</h3>
+                    <ul>
+                        <li>🖱️ <strong>Click + Drag:</strong> Pan map</li>
+                        <li>🔍 <strong>Scroll:</strong> Zoom in/out</li>
+                        <li>⌨️ <strong>Right Click + Drag:</strong> Rotate/tilt</li>
+                        <li>🎬 <strong>Start Tour:</strong> Animated flythrough</li>
+                    </ul>
+                </div>
             </div>
 
             <!-- Loading Indicator -->
@@ -166,5 +168,50 @@
 
     <!-- JavaScript -->
     <script src="script.js"></script>
+    
+    <!-- ADDED: Mobile toggle functionality -->
+    <script>
+        // Mobile panel toggle functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            // Regional info toggle
+            const regionalToggle = document.getElementById('regionalToggle');
+            const regionalInfo = document.getElementById('regionalInfo');
+            
+            if (regionalToggle) {
+                regionalToggle.addEventListener('click', function() {
+                    regionalInfo.classList.toggle('collapsed');
+                    this.textContent = regionalInfo.classList.contains('collapsed') 
+                        ? 'ℹ️ View Info' 
+                        : '✖️ Hide Info';
+                });
+            }
+            
+            // Local info toggle
+            const localToggle = document.getElementById('localToggle');
+            const localInfo = document.getElementById('localInfo');
+            
+            if (localToggle) {
+                localToggle.addEventListener('click', function() {
+                    localInfo.classList.toggle('collapsed');
+                    this.textContent = localInfo.classList.contains('collapsed') 
+                        ? 'ℹ️ View Info' 
+                        : '✖️ Hide Info';
+                });
+            }
+            
+            // Controls info toggle
+            const controlsToggle = document.getElementById('controlsToggle');
+            const controlsInfo = document.getElementById('controlsInfo');
+            
+            if (controlsToggle) {
+                controlsToggle.addEventListener('click', function() {
+                    controlsInfo.classList.toggle('collapsed');
+                    this.textContent = controlsInfo.classList.contains('collapsed') 
+                        ? '🎮 Map Controls' 
+                        : '✖️ Hide Controls';
+                });
+            }
+        });
+    </script>
 </body>
 </html>
