@@ -169,49 +169,112 @@
     <!-- JavaScript -->
     <script src="script.js"></script>
     
-    <!-- ADDED: Mobile toggle functionality -->
+    <!-- IMPROVED: Mobile toggle functionality with better event handling -->
     <script>
         // Mobile panel toggle functionality
-        document.addEventListener('DOMContentLoaded', function() {
-            // Regional info toggle
-            const regionalToggle = document.getElementById('regionalToggle');
-            const regionalInfo = document.getElementById('regionalInfo');
-            
-            if (regionalToggle) {
-                regionalToggle.addEventListener('click', function() {
-                    regionalInfo.classList.toggle('collapsed');
-                    this.textContent = regionalInfo.classList.contains('collapsed') 
-                        ? 'ℹ️ View Info' 
-                        : '✖️ Hide Info';
-                });
+        (function() {
+            // Function to setup toggle for an info panel
+            function setupInfoToggle(toggleId, infoId) {
+                const toggle = document.getElementById(toggleId);
+                const info = document.getElementById(infoId);
+                
+                if (toggle && info) {
+                    // Remove any existing listeners by cloning
+                    const newToggle = toggle.cloneNode(true);
+                    toggle.parentNode.replaceChild(newToggle, toggle);
+                    
+                    // Add click event with stopPropagation to prevent conflicts
+                    newToggle.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        
+                        info.classList.toggle('collapsed');
+                        this.textContent = info.classList.contains('collapsed') 
+                            ? 'ℹ️ View Info' 
+                            : '✖️ Hide Info';
+                    }, true);
+                    
+                    // Also add touch event for better mobile support
+                    newToggle.addEventListener('touchend', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        
+                        info.classList.toggle('collapsed');
+                        this.textContent = info.classList.contains('collapsed') 
+                            ? 'ℹ️ View Info' 
+                            : '✖️ Hide Info';
+                    }, true);
+                }
             }
             
-            // Local info toggle
-            const localToggle = document.getElementById('localToggle');
-            const localInfo = document.getElementById('localInfo');
-            
-            if (localToggle) {
-                localToggle.addEventListener('click', function() {
-                    localInfo.classList.toggle('collapsed');
-                    this.textContent = localInfo.classList.contains('collapsed') 
-                        ? 'ℹ️ View Info' 
-                        : '✖️ Hide Info';
-                });
+            // Function to setup controls toggle
+            function setupControlsToggle() {
+                const controlsToggle = document.getElementById('controlsToggle');
+                const controlsInfo = document.getElementById('controlsInfo');
+                
+                if (controlsToggle && controlsInfo) {
+                    // Remove any existing listeners
+                    const newToggle = controlsToggle.cloneNode(true);
+                    controlsToggle.parentNode.replaceChild(newToggle, controlsToggle);
+                    
+                    newToggle.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        
+                        controlsInfo.classList.toggle('collapsed');
+                        this.textContent = controlsInfo.classList.contains('collapsed') 
+                            ? '🎮 Map Controls' 
+                            : '✖️ Hide Controls';
+                    }, true);
+                    
+                    newToggle.addEventListener('touchend', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        
+                        controlsInfo.classList.toggle('collapsed');
+                        this.textContent = controlsInfo.classList.contains('collapsed') 
+                            ? '🎮 Map Controls' 
+                            : '✖️ Hide Controls';
+                    }, true);
+                }
             }
             
-            // Controls info toggle
-            const controlsToggle = document.getElementById('controlsToggle');
-            const controlsInfo = document.getElementById('controlsInfo');
+            // Initialize on DOM ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', function() {
+                    setupInfoToggle('regionalToggle', 'regionalInfo');
+                    setupInfoToggle('localToggle', 'localInfo');
+                    setupControlsToggle();
+                });
+            } else {
+                setupInfoToggle('regionalToggle', 'regionalInfo');
+                setupInfoToggle('localToggle', 'localInfo');
+                setupControlsToggle();
+            }
             
-            if (controlsToggle) {
-                controlsToggle.addEventListener('click', function() {
-                    controlsInfo.classList.toggle('collapsed');
-                    this.textContent = controlsInfo.classList.contains('collapsed') 
-                        ? '🎮 Map Controls' 
-                        : '✖️ Hide Controls';
+            // Re-initialize toggles when view changes (in case script.js modifies DOM)
+            const observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    if (mutation.attributeName === 'style' || mutation.attributeName === 'class') {
+                        // Re-setup toggles to ensure they work after view switches
+                        setTimeout(function() {
+                            setupInfoToggle('regionalToggle', 'regionalInfo');
+                            setupInfoToggle('localToggle', 'localInfo');
+                        }, 100);
+                    }
+                });
+            });
+            
+            // Observe the info panel for changes
+            const infoPanel = document.getElementById('infoPanel');
+            if (infoPanel) {
+                observer.observe(infoPanel, {
+                    attributes: true,
+                    childList: true,
+                    subtree: true
                 });
             }
-        });
+        })();
     </script>
 </body>
 </html>
