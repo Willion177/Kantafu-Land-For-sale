@@ -204,23 +204,43 @@ body {
     position: absolute;
     top: 1rem;
     right: 1rem;
-    background: rgba(0, 0, 0, 0.8);
+    background: rgba(0, 0, 0, 0.85);
     backdrop-filter: blur(10px);
     padding: 1rem;
     border-radius: 0.5rem;
     max-width: 24rem;
     color: white;
+    z-index: 10;
+}
+
+.mobile-toggle {
+    display: none;
+    width: 100%;
+    padding: 0.75rem;
+    background: #16a34a;
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    font-weight: bold;
+    cursor: pointer;
+    margin-bottom: 0.5rem;
+}
+
+.panel-content {
+    display: block;
 }
 
 .info-content h3 {
     color: #4ade80;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.75rem;
     font-size: 1.125rem;
+    font-weight: bold;
 }
 
 .info-content ul {
     list-style: none;
     font-size: 0.875rem;
+    margin-bottom: 1rem;
 }
 
 .info-content li {
@@ -246,6 +266,48 @@ body {
     color: #9ca3af;
 }
 
+/* Contact Section Styling */
+.contact-section {
+    margin-top: 1.5rem;
+    padding: 1rem;
+    background: linear-gradient(135deg, #16a34a 0%, #059669 100%);
+    border-radius: 0.5rem;
+    border: 2px solid #4ade80;
+    box-shadow: 0 4px 12px rgba(22, 163, 74, 0.4);
+}
+
+.contact-section h4 {
+    color: #fff;
+    font-size: 1rem;
+    margin-bottom: 0.75rem;
+    text-align: center;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.contact-section p {
+    color: #d1fae5;
+    font-size: 0.875rem;
+    margin-bottom: 0.5rem;
+    line-height: 1.6;
+}
+
+.contact-section strong {
+    color: #ffffff;
+    font-size: 1rem;
+    font-weight: bold;
+}
+
+.contact-name strong {
+    color: #fde047;
+}
+
+.contact-phone strong,
+.contact-email strong {
+    color: #ffffff;
+}
+
 /* Controls Info */
 .controls-info {
     position: absolute;
@@ -257,6 +319,7 @@ body {
     border-radius: 0.5rem;
     max-width: 20rem;
     font-size: 0.875rem;
+    z-index: 10;
 }
 
 .controls-info h3 {
@@ -272,6 +335,23 @@ body {
 .controls-info li {
     margin-bottom: 0.25rem;
     font-size: 0.75rem;
+}
+
+.controls-toggle {
+    display: none;
+    width: 100%;
+    padding: 0.75rem;
+    background: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    font-weight: bold;
+    cursor: pointer;
+    margin-bottom: 0.5rem;
+}
+
+.controls-panel-content {
+    display: block;
 }
 
 /* Loading */
@@ -380,7 +460,87 @@ body {
         gap: 0.5rem;
     }
     
+    /* FIXED: Info panel now properly positioned and collapsed by default on mobile */
     .info-panel {
         max-width: calc(100% - 2rem);
+        top: auto;
+        bottom: 1rem;
+        right: 1rem;
+        left: 1rem;
+        max-height: 60vh;
+        overflow-y: auto;
+        padding: 0.75rem;
+    }
+    
+    /* FIXED: Show toggle button on mobile */
+    .mobile-toggle {
+        display: block;
+    }
+    
+    /* FIXED: Collapse panel content by default on mobile */
+    .info-content .panel-content {
+        display: none;
+    }
+    
+    /* FIXED: Show panel content when not collapsed */
+    .info-content:not(.collapsed) .panel-content {
+        display: block;
+    }
+    
+    /* FIXED: Controls info - show as collapsible button on mobile */
+    .controls-info {
+        bottom: auto;
+        top: 1rem;
+        left: 1rem;
+        right: auto;
+        max-width: calc(100% - 2rem);
+        padding: 0.75rem;
+        background: rgba(0, 0, 0, 0.85);
+    }
+    
+    /* FIXED: Show controls toggle button on mobile */
+    .controls-toggle {
+        display: block;
+    }
+    
+    /* FIXED: Hide controls panel content by default on mobile */
+    .controls-info .controls-panel-content {
+        display: none;
+    }
+    
+    /* FIXED: Show controls content when not collapsed */
+    .controls-info:not(.collapsed) .controls-panel-content {
+        display: block;
+    }
+    
+    /* FIXED: Reduce font sizes for better mobile readability */
+    .info-content h3 {
+        font-size: 1rem;
+    }
+    
+    .info-content ul {
+        font-size: 0.8rem;
+    }
+    
+    .contact-section {
+        margin-top: 1rem;
+        padding: 0.75rem;
+    }
+    
+    .contact-section h4 {
+        font-size: 0.875rem;
+    }
+    
+    .contact-section p {
+        font-size: 0.75rem;
+    }
+    
+    /* FIXED: Ensure panels don't overlap */
+    .info-panel {
+        z-index: 11;
+    }
+    
+    .controls-info {
+        z-index: 10;
     }
 }
