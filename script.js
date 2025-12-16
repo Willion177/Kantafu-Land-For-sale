@@ -483,35 +483,30 @@ function startTour() {
 
     if (currentView === 'regional') {
         const tourStops = [
-            { center: [36.91, -1.27], zoom: 12, pitch: 50, bearing: 90, duration: 2500 },
-            { center: [37.06, -1.27], zoom: 12, pitch: 50, bearing: 90, duration: 2500 },
-            { center: KANGUNDO_TO_KIMANI_JUNCTION, zoom: 14, pitch: 60, bearing: 45, duration: 3000 },
-            { center: [37.187, -1.295], zoom: 15, pitch: 65, bearing: 20, duration: 2500 },
-            { center: TERTIARY_ROAD_JUNCTION, zoom: 16, pitch: 65, bearing: -10, duration: 2500 },
-            { center: PLOT_CENTER, zoom: 16.5, pitch: 60, bearing: 0, duration: 3500 }
+            { center: [36.91, -1.27], zoom: 12, pitch: 45, bearing: 90, duration: 2500 },
+            { center: [37.06, -1.27], zoom: 12, pitch: 45, bearing: 90, duration: 2500 },
+            { center: KANGUNDO_TO_KIMANI_JUNCTION, zoom: 14, pitch: 50, bearing: 45, duration: 3000 },
+            { center: [37.187, -1.295], zoom: 15, pitch: 55, bearing: 20, duration: 2500 },
+            { center: TERTIARY_ROAD_JUNCTION, zoom: 16, pitch: 55, bearing: -10, duration: 2500 },
+            { center: PLOT_CENTER, zoom: 16, pitch: 55, bearing: 0, duration: 3500 }
         ];
 
         let currentStop = 0;
         const flyToNext = () => {
             if (currentStop < tourStops.length) {
                 const stop = tourStops[currentStop];
-                const isLastStop = currentStop === tourStops.length - 1;
                 
                 map.flyTo({ 
                     ...stop, 
-                    essential: true,
-                    // Smoother easing for final approach
-                    easing: isLastStop ? (t) => 1 - Math.pow(1 - t, 3) : undefined
+                    essential: true
                 });
                 
                 currentStop++;
                 setTimeout(flyToNext, stop.duration);
             } else {
-                // Wait for tiles to load, then lock position
+                // Lock final view after tiles load
                 setTimeout(() => {
-                    map.stop(); // Stop any ongoing animation
-                    map.setPitch(60);
-                    map.setBearing(0);
+                    map.stop();
                     endTour();
                 }, 1000);
             }
