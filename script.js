@@ -487,35 +487,33 @@ function startTour() {
             { center: [37.06, -1.27], zoom: 12, pitch: 50, bearing: 90, duration: 2500 },
             { center: KANGUNDO_TO_KIMANI_JUNCTION, zoom: 14, pitch: 60, bearing: 45, duration: 3000 },
             { center: [37.187, -1.295], zoom: 15, pitch: 65, bearing: 20, duration: 2500 },
-            { center: TERTIARY_ROAD_JUNCTION, zoom: 16, pitch: 70, bearing: -10, duration: 2500 },
-            { center: PLOT_CENTER, zoom: 17, pitch: 65, bearing: 0, duration: 3000 }
+            { center: TERTIARY_ROAD_JUNCTION, zoom: 16, pitch: 65, bearing: -10, duration: 2500 },
+            { center: PLOT_CENTER, zoom: 16.5, pitch: 60, bearing: 0, duration: 3500 }
         ];
 
         let currentStop = 0;
         const flyToNext = () => {
             if (currentStop < tourStops.length) {
                 const stop = tourStops[currentStop];
+                const isLastStop = currentStop === tourStops.length - 1;
+                
                 map.flyTo({ 
                     ...stop, 
                     essential: true,
-                    // Add easing for smooth stop at the end
-                    easing: currentStop === tourStops.length - 1 ? (t) => t : undefined
+                    // Smoother easing for final approach
+                    easing: isLastStop ? (t) => 1 - Math.pow(1 - t, 3) : undefined
                 });
-                currentStop++;
                 
-                // If this is the last stop, wait longer before ending
-                const waitTime = currentStop === tourStops.length ? stop.duration + 1000 : stop.duration;
-                setTimeout(flyToNext, waitTime);
+                currentStop++;
+                setTimeout(flyToNext, stop.duration);
             } else {
-                // Ensure final position is locked
-                map.easeTo({
-                    center: PLOT_CENTER,
-                    zoom: 17,
-                    pitch: 65,
-                    bearing: 0,
-                    duration: 500
-                });
-                setTimeout(() => endTour(), 500);
+                // Wait for tiles to load, then lock position
+                setTimeout(() => {
+                    map.stop(); // Stop any ongoing animation
+                    map.setPitch(60);
+                    map.setBearing(0);
+                    endTour();
+                }, 1000);
             }
         };
         flyToNext();
