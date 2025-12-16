@@ -1,8 +1,8 @@
 // Mapbox Access Token
 mapboxgl.accessToken = 'pk.eyJ1Ijoia2lyb25qaWdnIiwiYSI6ImNtaDc5enB6NzBxZXQya3NpbHh3cTdxaTUifQ.PvzCNIg-j8EbgpJqHZK7sQ';
 
-// COORDINATES
-const PLOT_CENTER = [37.181111, -1.304444];
+// COORDINATES (verified correct format: [longitude, latitude])
+const PLOT_CENTER = [37.181111, -1.304444]; // Confirmed correct
 const KANGUNDO_TO_KIMANI_JUNCTION = [37.18666103710807, -1.286272974171356];
 const TERTIARY_ROAD_JUNCTION = [37.186968206848235, -1.304346093461787];
 
@@ -113,10 +113,11 @@ function createPlotMarker() {
         flex-direction: column;
         align-items: center;
         gap: 8px;
+        cursor: pointer;
     `;
     
     const icon = document.createElement('div');
-    icon.style.cssText = 'width: 60px; height: 60px; cursor: pointer;';
+    icon.style.cssText = 'width: 60px; height: 60px;';
     icon.innerHTML = `
         <svg width="60" height="60" viewBox="0 0 60 60" style="filter: drop-shadow(0 6px 12px rgba(0,0,0,0.8));">
             <circle cx="30" cy="30" r="25" fill="#00ff00" opacity="0.3">
@@ -145,18 +146,37 @@ function createPlotMarker() {
         border: 3px solid #4ade80;
         text-transform: uppercase;
         letter-spacing: 1px;
-        animation: plotPulse 2s infinite;
+        opacity: 0;
+        transform: translateY(-10px);
+        transition: all 0.3s ease;
+        pointer-events: none;
     `;
     label.textContent = '🎯 PLOT FOR SALE';
     
-    const style = document.createElement('style');
-    style.textContent = `
-        @keyframes plotPulse {
-            0%, 100% { transform: scale(1); box-shadow: 0 4px 12px rgba(22, 163, 74, 0.6); }
-            50% { transform: scale(1.05); box-shadow: 0 6px 20px rgba(22, 163, 74, 0.9); }
-        }
-    `;
-    document.head.appendChild(style);
+    // Show banner on hover
+    container.addEventListener('mouseenter', () => {
+        label.style.opacity = '1';
+        label.style.transform = 'translateY(0)';
+    });
+    
+    container.addEventListener('mouseleave', () => {
+        label.style.opacity = '0';
+        label.style.transform = 'translateY(-10px)';
+    });
+    
+    // Show banner on click (for mobile)
+    let clickTimeout;
+    container.addEventListener('click', () => {
+        label.style.opacity = '1';
+        label.style.transform = 'translateY(0)';
+        
+        // Hide after 3 seconds
+        clearTimeout(clickTimeout);
+        clickTimeout = setTimeout(() => {
+            label.style.opacity = '0';
+            label.style.transform = 'translateY(-10px)';
+        }, 3000);
+    });
     
     container.appendChild(icon);
     container.appendChild(label);
