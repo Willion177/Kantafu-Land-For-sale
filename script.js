@@ -107,23 +107,61 @@ function createLandmarkMarker(landmark) {
 }
 
 function createPlotMarker() {
-    const el = document.createElement('div');
-    el.style.cssText = 'width: 50px; height: 50px; cursor: pointer;';
-    el.innerHTML = `
-        <svg width="50" height="50" viewBox="0 0 50 50" style="filter: drop-shadow(0 4px 8px rgba(0,0,0,0.6));">
-            <circle cx="25" cy="25" r="20" fill="#00ff00" opacity="0.3">
-                <animate attributeName="r" from="15" to="22" dur="2s" repeatCount="indefinite"/>
-                <animate attributeName="opacity" from="0.5" to="0" dur="2s" repeatCount="indefinite"/>
+    const container = document.createElement('div');
+    container.style.cssText = `
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+    `;
+    
+    const icon = document.createElement('div');
+    icon.style.cssText = 'width: 60px; height: 60px; cursor: pointer;';
+    icon.innerHTML = `
+        <svg width="60" height="60" viewBox="0 0 60 60" style="filter: drop-shadow(0 6px 12px rgba(0,0,0,0.8));">
+            <circle cx="30" cy="30" r="25" fill="#00ff00" opacity="0.3">
+                <animate attributeName="r" from="18" to="28" dur="2s" repeatCount="indefinite"/>
+                <animate attributeName="opacity" from="0.6" to="0" dur="2s" repeatCount="indefinite"/>
             </circle>
-            <circle cx="25" cy="25" r="12" fill="#00ff00" stroke="white" stroke-width="3"/>
-            <circle cx="25" cy="25" r="5" fill="white"/>
-            <path d="M 25 10 L 27 18 L 35 15 L 28 22 L 35 28 L 27 26 L 25 35 L 23 26 L 15 28 L 22 22 L 15 15 L 23 18 Z" 
-                  fill="#ffff00" opacity="0.8" stroke="white" stroke-width="1">
-                <animateTransform attributeName="transform" type="rotate" from="0 25 25" to="360 25 25" dur="10s" repeatCount="indefinite"/>
+            <circle cx="30" cy="30" r="16" fill="#00ff00" stroke="white" stroke-width="4"/>
+            <circle cx="30" cy="30" r="7" fill="white"/>
+            <path d="M 30 12 L 33 22 L 42 18 L 34 27 L 42 34 L 33 31 L 30 42 L 27 31 L 18 34 L 26 27 L 18 18 L 27 22 Z" 
+                  fill="#ffff00" opacity="0.9" stroke="white" stroke-width="1.5">
+                <animateTransform attributeName="transform" type="rotate" from="0 30 30" to="360 30 30" dur="8s" repeatCount="indefinite"/>
             </path>
         </svg>
     `;
-    return el;
+    
+    const label = document.createElement('div');
+    label.style.cssText = `
+        background: linear-gradient(135deg, #16a34a 0%, #059669 100%);
+        color: white;
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: bold;
+        white-space: nowrap;
+        box-shadow: 0 4px 12px rgba(22, 163, 74, 0.6);
+        border: 3px solid #4ade80;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        animation: plotPulse 2s infinite;
+    `;
+    label.textContent = '🎯 PLOT FOR SALE';
+    
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes plotPulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 4px 12px rgba(22, 163, 74, 0.6); }
+            50% { transform: scale(1.05); box-shadow: 0 6px 20px rgba(22, 163, 74, 0.9); }
+        }
+    `;
+    document.head.appendChild(style);
+    
+    container.appendChild(icon);
+    container.appendChild(label);
+    
+    return container;
 }
 
 function initRegionalMap() {
@@ -244,10 +282,8 @@ function initRegionalMap() {
         
         // Add plot marker
         const plotMarker = createPlotMarker();
-        new mapboxgl.Marker(plotMarker, { anchor: 'center' })
+        new mapboxgl.Marker({ element: plotMarker, anchor: 'bottom' })
             .setLngLat(PLOT_CENTER)
-            .setPopup(new mapboxgl.Popup({ offset: 25, closeButton: false })
-                .setHTML('<div style="text-align:center;"><strong>Plot on Sale</strong></div>'))
             .addTo(regionalMap);
 
         hideLoading();
@@ -343,19 +379,15 @@ function initLocalMap() {
         // Add key landmarks with special markers
         keyLandmarks.forEach(landmark => {
             const el = createLandmarkMarker(landmark);
-            new mapboxgl.Marker(el)
+            new mapboxgl.Marker({ element: el, anchor: 'left' })
                 .setLngLat(landmark.coords)
-                .setPopup(new mapboxgl.Popup({ offset: 25, closeButton: false })
-                    .setHTML(`<div style="text-align:center;"><strong>${landmark.name}</strong></div>`))
                 .addTo(localMap);
         });
 
         // Add plot marker
         const plotMarker = createPlotMarker();
-        new mapboxgl.Marker(plotMarker, { anchor: 'center' })
+        new mapboxgl.Marker({ element: plotMarker, anchor: 'bottom' })
             .setLngLat(PLOT_CENTER)
-            .setPopup(new mapboxgl.Popup({ offset: 25, closeButton: false })
-                .setHTML('<div style="text-align:center;"><strong>Plot on Sale</strong></div>'))
             .addTo(localMap);
 
         hideLoading();
@@ -369,6 +401,8 @@ function setupEventListeners() {
     const resetBtn = document.getElementById('resetBtn');
     const regionalToggle = document.getElementById('regionalToggle');
     const localToggle = document.getElementById('localToggle');
+    const controlsToggle = document.getElementById('controlsToggle');
+    const controlsInfo = document.getElementById('controlsInfo');
 
     regionalBtn.addEventListener('click', () => switchView('regional'));
     localBtn.addEventListener('click', () => switchView('local'));
@@ -376,14 +410,28 @@ function setupEventListeners() {
     resetBtn.addEventListener('click', resetView);
     
     if (regionalToggle) {
-        regionalToggle.addEventListener('click', () => {
-            document.getElementById('regionalInfo').classList.toggle('collapsed');
+        regionalToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const panel = document.getElementById('regionalInfo');
+            panel.classList.toggle('collapsed');
+            regionalToggle.textContent = panel.classList.contains('collapsed') ? 'ℹ️ View Info' : '✖️ Close Info';
         });
     }
     
     if (localToggle) {
-        localToggle.addEventListener('click', () => {
-            document.getElementById('localInfo').classList.toggle('collapsed');
+        localToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const panel = document.getElementById('localInfo');
+            panel.classList.toggle('collapsed');
+            localToggle.textContent = panel.classList.contains('collapsed') ? 'ℹ️ View Info' : '✖️ Close Info';
+        });
+    }
+    
+    if (controlsToggle) {
+        controlsToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            controlsInfo.classList.toggle('collapsed');
+            controlsToggle.textContent = controlsInfo.classList.contains('collapsed') ? '🎮 Map Controls' : '✖️ Close';
         });
     }
 }
@@ -440,17 +488,34 @@ function startTour() {
             { center: KANGUNDO_TO_KIMANI_JUNCTION, zoom: 14, pitch: 60, bearing: 45, duration: 3000 },
             { center: [37.187, -1.295], zoom: 15, pitch: 65, bearing: 20, duration: 2500 },
             { center: TERTIARY_ROAD_JUNCTION, zoom: 16, pitch: 70, bearing: -10, duration: 2500 },
-            { center: PLOT_CENTER, zoom: 17, pitch: 70, bearing: -20, duration: 3000 }
+            { center: PLOT_CENTER, zoom: 17, pitch: 65, bearing: 0, duration: 3000 }
         ];
 
         let currentStop = 0;
         const flyToNext = () => {
             if (currentStop < tourStops.length) {
-                map.flyTo({ ...tourStops[currentStop], essential: true });
+                const stop = tourStops[currentStop];
+                map.flyTo({ 
+                    ...stop, 
+                    essential: true,
+                    // Add easing for smooth stop at the end
+                    easing: currentStop === tourStops.length - 1 ? (t) => t : undefined
+                });
                 currentStop++;
-                setTimeout(flyToNext, tourStops[currentStop - 1].duration);
+                
+                // If this is the last stop, wait longer before ending
+                const waitTime = currentStop === tourStops.length ? stop.duration + 1000 : stop.duration;
+                setTimeout(flyToNext, waitTime);
             } else {
-                endTour();
+                // Ensure final position is locked
+                map.easeTo({
+                    center: PLOT_CENTER,
+                    zoom: 17,
+                    pitch: 65,
+                    bearing: 0,
+                    duration: 500
+                });
+                setTimeout(() => endTour(), 500);
             }
         };
         flyToNext();
