@@ -190,13 +190,28 @@ body {
     display: block !important;
 }
 
-/* Ensure Mapbox canvas fills container */
 .map canvas {
     position: absolute !important;
     top: 0 !important;
     left: 0 !important;
     width: 100% !important;
     height: 100% !important;
+}
+
+/* Watermark - Subtle at bottom */
+.watermark {
+    position: absolute;
+    bottom: 4rem;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.25);
+    font-weight: 500;
+    letter-spacing: 1px;
+    z-index: 5;
+    pointer-events: none;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+    font-family: 'Courier New', monospace;
 }
 
 /* Info Panel */
@@ -214,7 +229,7 @@ body {
 }
 
 .mobile-toggle {
-    display: none;
+    display: block;
     width: 100%;
     padding: 0.75rem;
     background: #16a34a;
@@ -224,6 +239,11 @@ body {
     font-weight: bold;
     cursor: pointer;
     margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+}
+
+.mobile-toggle:hover {
+    background: #15803d;
 }
 
 .panel-content {
@@ -266,46 +286,41 @@ body {
     color: #9ca3af;
 }
 
-/* Contact Section Styling */
-.contact-section {
-    margin-top: 1.5rem;
+.info-content.collapsed .panel-content {
+    display: none !important;
+}
+
+.info-content:not(.collapsed) .panel-content {
+    display: block !important;
+}
+
+/* Property Section */
+.property-section {
+    margin-top: 1rem;
     padding: 1rem;
-    background: linear-gradient(135deg, #16a34a 0%, #059669 100%);
+    background: rgba(59, 130, 246, 0.1);
     border-radius: 0.5rem;
-    border: 2px solid #4ade80;
-    box-shadow: 0 4px 12px rgba(22, 163, 74, 0.4);
+    border: 1px solid #3b82f6;
 }
 
-.contact-section h4 {
-    color: #fff;
-    font-size: 1rem;
-    margin-bottom: 0.75rem;
-    text-align: center;
-    font-weight: bold;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-.contact-section p {
-    color: #d1fae5;
-    font-size: 0.875rem;
+.property-section h4 {
+    color: #60a5fa;
+    font-size: 0.95rem;
     margin-bottom: 0.5rem;
-    line-height: 1.6;
-}
-
-.contact-section strong {
-    color: #ffffff;
-    font-size: 1rem;
     font-weight: bold;
 }
 
-.contact-name strong {
-    color: #fde047;
+.property-section p {
+    font-size: 0.85rem;
+    margin-bottom: 0.4rem;
+    line-height: 1.5;
 }
 
-.contact-phone strong,
-.contact-email strong {
-    color: #ffffff;
+.editable {
+    background: rgba(251, 191, 36, 0.2);
+    padding: 2px 6px;
+    border-radius: 3px;
+    border: 1px dashed #fbbf24;
 }
 
 /* Controls Info */
@@ -338,7 +353,7 @@ body {
 }
 
 .controls-toggle {
-    display: none;
+    display: block;
     width: 100%;
     padding: 0.75rem;
     background: #3b82f6;
@@ -348,10 +363,23 @@ body {
     font-weight: bold;
     cursor: pointer;
     margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+}
+
+.controls-toggle:hover {
+    background: #2563eb;
 }
 
 .controls-panel-content {
     display: block;
+}
+
+.controls-info.collapsed .controls-panel-content {
+    display: none !important;
+}
+
+.controls-info:not(.collapsed) .controls-panel-content {
+    display: block !important;
 }
 
 /* Loading */
@@ -423,22 +451,6 @@ body {
     font-size: 0.75rem;
 }
 
-/* Pulsing animation for plot marker */
-@keyframes pulse {
-    0%, 100% {
-        transform: scale(1);
-        opacity: 1;
-    }
-    50% {
-        transform: scale(1.3);
-        opacity: 0.7;
-    }
-}
-
-.plot-marker {
-    animation: pulse 2s infinite;
-}
-
 /* Responsive */
 @media (max-width: 768px) {
     .header-content {
@@ -460,87 +472,32 @@ body {
         gap: 0.5rem;
     }
     
-    /* FIXED: Info panel now properly positioned and collapsed by default on mobile */
     .info-panel {
-        max-width: calc(100% - 2rem);
+        position: fixed;
         top: auto;
-        bottom: 1rem;
-        right: 1rem;
-        left: 1rem;
-        max-height: 60vh;
+        bottom: 0;
+        right: 0;
+        left: 0;
+        max-width: 100%;
+        border-radius: 1rem 1rem 0 0;
+        max-height: 70vh;
         overflow-y: auto;
-        padding: 0.75rem;
-    }
-    
-    /* FIXED: Show toggle button on mobile */
-    .mobile-toggle {
-        display: block;
-    }
-    
-    /* FIXED: Collapse panel content by default on mobile */
-    .info-content .panel-content {
-        display: none;
-    }
-    
-    /* FIXED: Show panel content when not collapsed */
-    .info-content:not(.collapsed) .panel-content {
-        display: block;
-    }
-    
-    /* FIXED: Controls info - show as collapsible button on mobile */
-    .controls-info {
-        bottom: auto;
-        top: 1rem;
-        left: 1rem;
-        right: auto;
-        max-width: calc(100% - 2rem);
-        padding: 0.75rem;
-        background: rgba(0, 0, 0, 0.85);
-    }
-    
-    /* FIXED: Show controls toggle button on mobile */
-    .controls-toggle {
-        display: block;
-    }
-    
-    /* FIXED: Hide controls panel content by default on mobile */
-    .controls-info .controls-panel-content {
-        display: none;
-    }
-    
-    /* FIXED: Show controls content when not collapsed */
-    .controls-info:not(.collapsed) .controls-panel-content {
-        display: block;
-    }
-    
-    /* FIXED: Reduce font sizes for better mobile readability */
-    .info-content h3 {
-        font-size: 1rem;
-    }
-    
-    .info-content ul {
-        font-size: 0.8rem;
-    }
-    
-    .contact-section {
-        margin-top: 1rem;
-        padding: 0.75rem;
-    }
-    
-    .contact-section h4 {
-        font-size: 0.875rem;
-    }
-    
-    .contact-section p {
-        font-size: 0.75rem;
-    }
-    
-    /* FIXED: Ensure panels don't overlap */
-    .info-panel {
-        z-index: 11;
+        z-index: 1000;
     }
     
     .controls-info {
-        z-index: 10;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        max-width: 100%;
+        border-radius: 1rem 1rem 0 0;
+        margin: 0;
+        z-index: 999;
+    }
+    
+    .watermark {
+        font-size: 0.65rem;
+        bottom: 3.5rem;
     }
 }
