@@ -1,13 +1,9 @@
-// Mapbox Access Token
 mapboxgl.accessToken = 'pk.eyJ1Ijoia2lyb25qaWdnIiwiYSI6ImNtaDc5enB6NzBxZXQya3NpbHh3cTdxaTUifQ.PvzCNIg-j8EbgpJqHZK7sQ';
 
-// COORDINATES (verified correct format: [longitude, latitude])
-const PLOT_CENTER = [37.181111, -1.304444]; // Confirmed correct
+// COORDINATES
+const PLOT_CENTER = [37.181111, -1.304444];
 const KANGUNDO_TO_KIMANI_JUNCTION = [37.18666103710807, -1.286272974171356];
 const TERTIARY_ROAD_JUNCTION = [37.186968206848235, -1.304346093461787];
-
-// Towns
-const townNames = ['Komarock', 'Kayole', 'Njiru', 'Ruai', 'Kamulu', 'Joska', 'Malaa', 'Kantafu'];
 
 // Key Landmarks with custom markers
 const keyLandmarks = [
@@ -29,7 +25,6 @@ let localMap = null;
 let isTouring = false;
 let currentView = 'regional';
 
-// Initialize
 document.addEventListener('DOMContentLoaded', () => {
     initRegionalMap();
     initLocalMap();
@@ -106,82 +101,42 @@ function createLandmarkMarker(landmark) {
     return container;
 }
 
-function createPlotMarker() {
-    const container = document.createElement('div');
-    container.style.cssText = `
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 8px;
+function createSimplePlotPin() {
+    const pinContainer = document.createElement('div');
+    pinContainer.style.cssText = `
+        width: 32px;
+        height: 40px;
+        position: relative;
         cursor: pointer;
     `;
     
-    const icon = document.createElement('div');
-    icon.style.cssText = 'width: 60px; height: 60px;';
-    icon.innerHTML = `
-        <svg width="60" height="60" viewBox="0 0 60 60" style="filter: drop-shadow(0 6px 12px rgba(0,0,0,0.8));">
-            <circle cx="30" cy="30" r="25" fill="#00ff00" opacity="0.3">
-                <animate attributeName="r" from="18" to="28" dur="2s" repeatCount="indefinite"/>
-                <animate attributeName="opacity" from="0.6" to="0" dur="2s" repeatCount="indefinite"/>
-            </circle>
-            <circle cx="30" cy="30" r="16" fill="#00ff00" stroke="white" stroke-width="4"/>
-            <circle cx="30" cy="30" r="7" fill="white"/>
-            <path d="M 30 12 L 33 22 L 42 18 L 34 27 L 42 34 L 33 31 L 30 42 L 27 31 L 18 34 L 26 27 L 18 18 L 27 22 Z" 
-                  fill="#ffff00" opacity="0.9" stroke="white" stroke-width="1.5">
-                <animateTransform attributeName="transform" type="rotate" from="0 30 30" to="360 30 30" dur="8s" repeatCount="indefinite"/>
-            </path>
-        </svg>
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('viewBox', '0 0 32 40');
+    svg.setAttribute('width', '32');
+    svg.setAttribute('height', '40');
+    svg.style.cssText = `
+        filter: drop-shadow(0 2px 4px rgba(0,0,0,0.6));
     `;
     
-    const label = document.createElement('div');
-    label.style.cssText = `
-        background: linear-gradient(135deg, #16a34a 0%, #059669 100%);
-        color: white;
-        padding: 10px 20px;
-        border-radius: 8px;
-        font-size: 16px;
-        font-weight: bold;
-        white-space: nowrap;
-        box-shadow: 0 4px 12px rgba(22, 163, 74, 0.6);
-        border: 3px solid #4ade80;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        opacity: 0;
-        transform: translateY(-10px);
-        transition: all 0.3s ease;
-        pointer-events: none;
-    `;
-    label.textContent = '🎯 PLOT FOR SALE';
+    const head = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    head.setAttribute('cx', '16');
+    head.setAttribute('cy', '12');
+    head.setAttribute('r', '10');
+    head.setAttribute('fill', '#ef4444');
+    head.setAttribute('stroke', '#ffffff');
+    head.setAttribute('stroke-width', '2');
     
-    // Show banner on hover
-    container.addEventListener('mouseenter', () => {
-        label.style.opacity = '1';
-        label.style.transform = 'translateY(0)';
-    });
+    const body = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+    body.setAttribute('points', '16,40 8,20 24,20');
+    body.setAttribute('fill', '#ef4444');
+    body.setAttribute('stroke', '#ffffff');
+    body.setAttribute('stroke-width', '1');
     
-    container.addEventListener('mouseleave', () => {
-        label.style.opacity = '0';
-        label.style.transform = 'translateY(-10px)';
-    });
+    svg.appendChild(head);
+    svg.appendChild(body);
+    pinContainer.appendChild(svg);
     
-    // Show banner on click (for mobile)
-    let clickTimeout;
-    container.addEventListener('click', () => {
-        label.style.opacity = '1';
-        label.style.transform = 'translateY(0)';
-        
-        // Hide after 3 seconds
-        clearTimeout(clickTimeout);
-        clickTimeout = setTimeout(() => {
-            label.style.opacity = '0';
-            label.style.transform = 'translateY(-10px)';
-        }, 3000);
-    });
-    
-    container.appendChild(icon);
-    container.appendChild(label);
-    
-    return container;
+    return pinContainer;
 }
 
 function initRegionalMap() {
@@ -198,7 +153,6 @@ function initRegionalMap() {
     regionalMap.on('load', async () => {
         console.log('Regional map loaded');
         
-        // Add terrain
         regionalMap.addSource('mapbox-dem', {
             type: 'raster-dem',
             url: 'mapbox://mapbox.mapbox-terrain-dem-v1',
@@ -207,7 +161,6 @@ function initRegionalMap() {
         });
         regionalMap.setTerrain({ source: 'mapbox-dem', exaggeration: 1.5 });
 
-        // Add sky
         regionalMap.addLayer({
             id: 'sky',
             type: 'sky',
@@ -218,7 +171,6 @@ function initRegionalMap() {
             }
         });
 
-        // Get Kangundo Road route
         try {
             const response = await fetch(
                 `https://api.mapbox.com/directions/v5/mapbox/driving/36.909028720789166,-1.2666563334377692;${KANGUNDO_TO_KIMANI_JUNCTION[0]},${KANGUNDO_TO_KIMANI_JUNCTION[1]}?geometries=geojson&access_token=${mapboxgl.accessToken}`
@@ -246,7 +198,6 @@ function initRegionalMap() {
             console.error('Error fetching Kangundo Road:', error);
         }
 
-        // Get Kimani Road route
         try {
             const response = await fetch(
                 `https://api.mapbox.com/directions/v5/mapbox/driving/${KANGUNDO_TO_KIMANI_JUNCTION[0]},${KANGUNDO_TO_KIMANI_JUNCTION[1]};${TERTIARY_ROAD_JUNCTION[0]},${TERTIARY_ROAD_JUNCTION[1]}?geometries=geojson&access_token=${mapboxgl.accessToken}`
@@ -274,7 +225,6 @@ function initRegionalMap() {
             console.error('Error fetching Kimani Road:', error);
         }
 
-        // Add tertiary road
         regionalMap.addSource('tertiary-road', {
             type: 'geojson',
             data: {
@@ -298,11 +248,8 @@ function initRegionalMap() {
             }
         });
 
-        // Geocode and add town markers (REMOVED - Mapbox shows them automatically)
-        
-        // Add plot marker
-        const plotMarker = createPlotMarker();
-        new mapboxgl.Marker({ element: plotMarker, anchor: 'bottom' })
+        const plotPin = createSimplePlotPin();
+        new mapboxgl.Marker({ element: plotPin, anchor: 'bottom' })
             .setLngLat(PLOT_CENTER)
             .addTo(regionalMap);
 
@@ -324,7 +271,6 @@ function initLocalMap() {
     localMap.on('load', async () => {
         console.log('Local map loaded');
         
-        // Add terrain
         localMap.addSource('mapbox-dem', {
             type: 'raster-dem',
             url: 'mapbox://mapbox.mapbox-terrain-dem-v1',
@@ -333,7 +279,6 @@ function initLocalMap() {
         });
         localMap.setTerrain({ source: 'mapbox-dem', exaggeration: 1.5 });
 
-        // Add sky
         localMap.addLayer({
             id: 'sky',
             type: 'sky',
@@ -344,7 +289,6 @@ function initLocalMap() {
             }
         });
 
-        // Get Kimani Road route
         try {
             const response = await fetch(
                 `https://api.mapbox.com/directions/v5/mapbox/driving/${KANGUNDO_TO_KIMANI_JUNCTION[0]},${KANGUNDO_TO_KIMANI_JUNCTION[1]};${TERTIARY_ROAD_JUNCTION[0]},${TERTIARY_ROAD_JUNCTION[1]}?geometries=geojson&access_token=${mapboxgl.accessToken}`
@@ -372,7 +316,6 @@ function initLocalMap() {
             console.error('Error fetching Kimani Road detail:', error);
         }
 
-        // Add tertiary road
         localMap.addSource('tertiary-road', {
             type: 'geojson',
             data: {
@@ -396,7 +339,6 @@ function initLocalMap() {
             }
         });
 
-        // Add key landmarks with special markers
         keyLandmarks.forEach(landmark => {
             const el = createLandmarkMarker(landmark);
             new mapboxgl.Marker({ element: el, anchor: 'left' })
@@ -404,9 +346,8 @@ function initLocalMap() {
                 .addTo(localMap);
         });
 
-        // Add plot marker
-        const plotMarker = createPlotMarker();
-        new mapboxgl.Marker({ element: plotMarker, anchor: 'bottom' })
+        const plotPin = createSimplePlotPin();
+        new mapboxgl.Marker({ element: plotPin, anchor: 'bottom' })
             .setLngLat(PLOT_CENTER)
             .addTo(localMap);
 
@@ -423,6 +364,8 @@ function setupEventListeners() {
     const localToggle = document.getElementById('localToggle');
     const controlsToggle = document.getElementById('controlsToggle');
     const controlsInfo = document.getElementById('controlsInfo');
+    const regionalInfo = document.getElementById('regionalInfo');
+    const localInfo = document.getElementById('localInfo');
 
     regionalBtn.addEventListener('click', () => switchView('regional'));
     localBtn.addEventListener('click', () => switchView('local'));
@@ -432,18 +375,16 @@ function setupEventListeners() {
     if (regionalToggle) {
         regionalToggle.addEventListener('click', (e) => {
             e.stopPropagation();
-            const panel = document.getElementById('regionalInfo');
-            panel.classList.toggle('collapsed');
-            regionalToggle.textContent = panel.classList.contains('collapsed') ? 'ℹ️ View Info' : '✖️ Close Info';
+            regionalInfo.classList.toggle('collapsed');
+            regionalToggle.textContent = regionalInfo.classList.contains('collapsed') ? 'ℹ️ View Info' : '✖️ Close Info';
         });
     }
     
     if (localToggle) {
         localToggle.addEventListener('click', (e) => {
             e.stopPropagation();
-            const panel = document.getElementById('localInfo');
-            panel.classList.toggle('collapsed');
-            localToggle.textContent = panel.classList.contains('collapsed') ? 'ℹ️ View Info' : '✖️ Close Info';
+            localInfo.classList.toggle('collapsed');
+            localToggle.textContent = localInfo.classList.contains('collapsed') ? 'ℹ️ View Info' : '✖️ Close Info';
         });
     }
     
@@ -502,52 +443,64 @@ function startTour() {
     `;
 
     if (currentView === 'regional') {
+        // DRONE-STYLE FLIGHT: Follow the actual road path from Kangundo Road to Plot
         const tourStops = [
-            { center: [36.91, -1.27], zoom: 12, pitch: 45, bearing: 90, duration: 2500 },
-            { center: [37.06, -1.27], zoom: 12, pitch: 45, bearing: 90, duration: 2500 },
-            { center: KANGUNDO_TO_KIMANI_JUNCTION, zoom: 14, pitch: 50, bearing: 45, duration: 3000 },
-            { center: [37.187, -1.295], zoom: 15, pitch: 55, bearing: 20, duration: 2500 },
-            { center: TERTIARY_ROAD_JUNCTION, zoom: 16, pitch: 55, bearing: -10, duration: 2500 },
-            { center: PLOT_CENTER, zoom: 16, pitch: 55, bearing: 0, duration: 3500 }
+            // Start at Kangundo Road beginning (wide overview)
+            { center: [36.92, -1.268], zoom: 11, pitch: 45, bearing: 0, duration: 3500 },
+            // Fly along Kangundo Road toward junction
+            { center: [37.05, -1.275], zoom: 12, pitch: 50, bearing: 80, duration: 3500 },
+            // Approach Kimani Road junction
+            { center: KANGUNDO_TO_KIMANI_JUNCTION, zoom: 13, pitch: 55, bearing: 100, duration: 3500 },
+            // Turn onto Kimani Road (green line)
+            { center: [37.187, -1.292], zoom: 14, pitch: 58, bearing: 120, duration: 3500 },
+            // Follow Kimani Road to tertiary junction
+            { center: TERTIARY_ROAD_JUNCTION, zoom: 15, pitch: 62, bearing: 150, duration: 3500 },
+            // Follow tertiary road to plot
+            { center: [37.184, -1.3025], zoom: 15.5, pitch: 65, bearing: 180, duration: 3000 },
+            // Final approach to plot location
+            { center: PLOT_CENTER, zoom: 16, pitch: 60, bearing: 0, duration: 3000 }
         ];
 
         let currentStop = 0;
         const flyToNext = () => {
             if (currentStop < tourStops.length) {
                 const stop = tourStops[currentStop];
-                
                 map.flyTo({ 
                     ...stop, 
-                    essential: true
+                    essential: true,
+                    // Smooth easing to prevent blurring
+                    easing: (t) => t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t
                 });
-                
                 currentStop++;
-                setTimeout(flyToNext, stop.duration);
+                
+                // Wait longer to let tiles load (prevents blurring)
+                const waitTime = stop.duration + 800;
+                setTimeout(flyToNext, waitTime);
             } else {
-                // Lock final view after tiles load
-                setTimeout(() => {
-                    map.stop();
-                    endTour();
-                }, 1000);
+                endTour();
             }
         };
         flyToNext();
     } else {
+        // LOCAL VIEW: Fly from tertiary road junction to plot
         const tourStops = [
-            { center: TERTIARY_ROAD_JUNCTION, zoom: 15, pitch: 60, bearing: 0, duration: 2000 },
-            { center: PLOT_CENTER, zoom: 16, pitch: 65, bearing: 90, duration: 2000 },
-            { center: PLOT_CENTER, zoom: 16.5, pitch: 70, bearing: 180, duration: 2000 },
-            { center: PLOT_CENTER, zoom: 16.5, pitch: 70, bearing: 270, duration: 2000 },
-            { center: PLOT_CENTER, zoom: 16, pitch: 65, bearing: 360, duration: 2000 },
-            { center: PLOT_CENTER, zoom: 15, pitch: 60, bearing: -20, duration: 2000 }
+            { center: TERTIARY_ROAD_JUNCTION, zoom: 14.5, pitch: 55, bearing: 0, duration: 3000 },
+            { center: [37.184, -1.3025], zoom: 15, pitch: 60, bearing: 90, duration: 3000 },
+            { center: PLOT_CENTER, zoom: 15.5, pitch: 62, bearing: 180, duration: 3000 },
+            { center: PLOT_CENTER, zoom: 16, pitch: 60, bearing: -20, duration: 3000 }
         ];
 
         let currentStop = 0;
         const flyToNext = () => {
             if (currentStop < tourStops.length) {
-                map.flyTo({ ...tourStops[currentStop], essential: true });
+                const stop = tourStops[currentStop];
+                map.flyTo({ 
+                    ...stop, 
+                    essential: true,
+                    easing: (t) => t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t
+                });
                 currentStop++;
-                setTimeout(flyToNext, tourStops[currentStop - 1].duration);
+                setTimeout(flyToNext, stop.duration + 600);
             } else {
                 endTour();
             }
